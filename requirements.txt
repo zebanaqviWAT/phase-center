@@ -1,0 +1,5 @@
+scipy
+numpy
+PySide6
+pyqtgraph
+pyaedt==0.6.46
