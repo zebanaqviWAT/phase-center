@@ -13,31 +13,22 @@ import math
 import os
 
 from scipy.spatial.transform import Rotation
-from scipy.stats import skew
-from random import seed
-from random import randint
 import sys, time, numpy as np
 from pyaedt import Hfss
-from PySide6.QtCore import (QCoreApplication, QRegularExpression, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QAction, QBrush, QDoubleValidator, QRegularExpressionValidator, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon, QCloseEvent,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtCore import (QCoreApplication, QRegularExpression,
+    QMetaObject, QRect)
+from PySide6.QtGui import (QAction, QRegularExpressionValidator, QIcon, QCloseEvent, QPixmap)
 from PySide6.QtWidgets import (QApplication, QMainWindow, QCheckBox, QComboBox, QGroupBox,
-    QLabel,QMenu,QMenuBar, QLineEdit, QPushButton, QRadioButton,
-    QSizePolicy, QWidget, QMessageBox,QStatusBar)
-from pyqtgraph import PlotWidget, plot
+    QLabel,QMenu,QMenuBar, QLineEdit, QPushButton, QWidget, QMessageBox, QStatusBar)
+from pyqtgraph import PlotWidget
 import pyqtgraph
-#import MyImages_rc
 
 class Ui_PhaseCenter(QMainWindow):
     def setupUi(self, PhaseCenter):
-        leftOffset = 90
+
         comboBoxHeight = 22
         comboBoxWidth = 56
-        origin_width = 31
+        #origin_width = 31
         self.setWindowIcon(QIcon('antenna-icon-614x460.png'))
         self.Auto = True
         self.theta_step = 1
@@ -81,7 +72,7 @@ class Ui_PhaseCenter(QMainWindow):
 
         self.groupBox_UserInput = QGroupBox(self.centralwidget)
         self.groupBox_UserInput.setObjectName(u"groupBox_UserInput")
-        self.groupBox_UserInput.setGeometry(QRect(10, 20, 331, 200))
+        self.groupBox_UserInput.setGeometry(QRect(10, 20, 75, 200))
 
         self.label_Polarization = QLabel(self.groupBox_UserInput)
         self.label_Polarization.setObjectName(u"label_Polarization")
@@ -93,22 +84,22 @@ class Ui_PhaseCenter(QMainWindow):
         self.comboBox_Polarization.addItem("")
         self.comboBox_Polarization.addItem("")
         self.comboBox_Polarization.setObjectName(u"comboBox_Polarization")
-        self.comboBox_Polarization.setGeometry(QRect(10, 55, comboBoxWidth, comboBoxHeight))
+        self.comboBox_Polarization.setGeometry(QRect(10, 40, comboBoxWidth, comboBoxHeight))
 
         self.label_pcv = QLabel(self.groupBox_UserInput)
         self.label_pcv.setObjectName(u"label_pcv")
-        self.label_pcv.setGeometry(QRect(75+15, 20, 75, 16))
+        self.label_pcv.setGeometry(QRect(10, 50+comboBoxHeight-10, 75, 16))
 
         self.comboBox_pcv = QComboBox(self.groupBox_UserInput)
         self.comboBox_pcv.addItem("")
         self.comboBox_pcv.addItem("")
         self.comboBox_pcv.setObjectName(u"comboBox_pcv")
-        self.comboBox_pcv.setGeometry(QRect(75, 55, comboBoxWidth, comboBoxHeight))
+        self.comboBox_pcv.setGeometry(QRect(10, 50+comboBoxHeight-10+5+16-2, comboBoxWidth, comboBoxHeight))
         self.comboBox_pcv.setToolTip("Turn on for phase center variation plot vs frequency")
 
         self.label_unit = QLabel(self.groupBox_UserInput)
         self.label_unit.setObjectName(u"label_unit")
-        self.label_unit.setGeometry(QRect(75+75+10-3, 20, 31, 16))
+        self.label_unit.setGeometry(QRect(10, 50+2*comboBoxHeight-10+5+16, 31, 16))
 
         self.comboBox_unit = QComboBox(self.groupBox_UserInput)
         self.comboBox_unit.addItem("")
@@ -117,7 +108,7 @@ class Ui_PhaseCenter(QMainWindow):
         self.comboBox_unit.addItem("")
         self.comboBox_unit.addItem("")
         self.comboBox_unit.setObjectName(u"comboBox_unit")
-        self.comboBox_unit.setGeometry(QRect(75+75-10, 55, comboBoxWidth, comboBoxHeight))
+        self.comboBox_unit.setGeometry(QRect(10, 50+3*comboBoxHeight-10+5+16-2, comboBoxWidth, comboBoxHeight))
         self.comboBox_unit.setToolTip("Unit for length assumed for user entries")
 
         # self.label_Origin = QLabel(self.groupBox_UserInput)
@@ -157,13 +148,13 @@ class Ui_PhaseCenter(QMainWindow):
 
         self.pushButton_CreateRCS = QPushButton(self.groupBox_UserInput)
         self.pushButton_CreateRCS.setObjectName(u"pushButton_CreateRCS")
-        self.pushButton_CreateRCS.setGeometry(QRect(leftOffset, 55 + 3 * comboBoxHeight + 3 * 10, 51, 31))
+        self.pushButton_CreateRCS.setGeometry(QRect(5, 55 + 3 * comboBoxHeight + 3 * 10, comboBoxWidth+10, 31))
         self.pushButton_CreateRCS.clicked.connect(self.createRCS)
         self.pushButton_CreateRCS.setToolTip("Click to calculate Phase Center")
         self.pushButton_CreateRCS.setEnabled(True)
         self.pushButton_CreateRCS.setStyleSheet('background-color :  green')
 
-        self.groupBox_Visualize = QGroupBox(self.groupBox_UserInput)
+        self.groupBox_Visualize = QGroupBox(self.centralwidget)
         self.groupBox_Visualize.setObjectName(u"groupBox_Visualize")
         self.groupBox_Visualize.setGeometry(QRect(210, 20, 91+25, 141))
 
@@ -186,7 +177,7 @@ class Ui_PhaseCenter(QMainWindow):
         self.checkBox_ShowPattern.setObjectName(u"checkBox_ShowPattern")
         self.checkBox_ShowPattern.setGeometry(QRect(20, 30, 75, 20))
         self.checkBox_ShowPattern.setToolTip("tentative: Currently doesn't overlay 3D polar plot")
-        self.checkBox_ShowPattern.setEnabled(False)
+        self.checkBox_ShowPattern.setEnabled(True)
 
         self.pushButton_View = QPushButton(self.groupBox_Visualize)
         self.pushButton_View.setObjectName(u"pushButton_View")
@@ -225,9 +216,6 @@ class Ui_PhaseCenter(QMainWindow):
         # self.label_sigma_of_plot.setObjectName(u"label_sigma_of_plot")
         # self.label_sigma_of_plot.setGeometry(QRect(370, 330, 49, 31))
 
-
-
-        self.reset()
         #self.save()
 
         # for x in self.hfss.field_setups:  # self.hfss.design_properties["RadField"]["FarFieldSetups"]:
@@ -236,12 +224,7 @@ class Ui_PhaseCenter(QMainWindow):
         #         self.hfss.save_project()
         #         time.sleep(2)
         # #deleted Infinite_Sphere_Global to avoid name conflict
-        if self.Inf_global not in [x.name for x in self.hfss.field_setups]:
-            self.hfss.insert_infinite_sphere(definition='Theta-Phi', x_start=-180, x_stop=180, x_step=self.theta_step,
-                                    y_start=0, y_stop=180, y_step=self.phi_step, units='deg',
-                                    custom_radiation_faces=None, custom_coordinate_system=None,
-                                    use_slant_polarization=False, polarization_angle=45,
-                                    name=self.Inf_global)
+
             #self.label_status.setText("Infinite Sphere Setup refernced to Global CS created")
         # for x in self.hfss.modeler.coordinate_systems:
         #     if self.PC_CS_name in x.name:
@@ -335,7 +318,7 @@ class Ui_PhaseCenter(QMainWindow):
         self.statusbar = QStatusBar(PhaseCenter)
         self.statusbar.setObjectName(u"statusbar")
         PhaseCenter.setStatusBar(self.statusbar)
-
+        #self.reset()
         QWidget.setTabOrder(self.pushButton_Reset, self.comboBox_unit)
         QWidget.setTabOrder(self.comboBox_unit, self.pushButton_CreateRCS)
         QWidget.setTabOrder(self.pushButton_CreateRCS, self.checkBox_ShowPattern)
@@ -367,7 +350,7 @@ class Ui_PhaseCenter(QMainWindow):
         # self.label_Origin.setText(QCoreApplication.translate("PhaseCenter", u"Origin", None))
         # self.label_OriginX.setText(QCoreApplication.translate("PhaseCenter", u"X", None))
         # self.label_OriginZ.setText(QCoreApplication.translate("PhaseCenter", u"Z", None))
-        self.pushButton_CreateRCS.setText(QCoreApplication.translate("PhaseCenter", u"Go!", None))
+        self.pushButton_CreateRCS.setText(QCoreApplication.translate("PhaseCenter", u"Calculate", None))
         self.pushButton_Exit.setText(QCoreApplication.translate("PhaseCenter", u"Exit", None))
         self.pushButton_Reset.setText(QCoreApplication.translate("PhaseCenter", u"Reset", None))
 
@@ -574,11 +557,13 @@ class Ui_PhaseCenter(QMainWindow):
         ZYZ_pccs = [euler_phi, euler_theta, euler_psi] # could ZYZ, ZXZ. naming not ideal
 
         # reduce the extend of theta start and stop to take less time as we are max rEComp should be in neighborhood of maxrETotal
-        # Inf_setup_list = [x for x in self.hfss.field_setups if Inf_PC_auto_name == x.name]
-        # if Inf_setup_list:
-        #     Inf_setup_list[0].props["ThetaStart"] = "-10deg"
-        #     Inf_setup_list[0].props["ThetaStart"] = "10deg"
-        #     Inf_setup_list[0].props["ThetaStep"] = "1deg"
+        Inf_setup_list = [x for x in self.hfss.field_setups if Inf_PC_auto_name == x.name]
+        if Inf_setup_list:
+            Inf_setup_list[0].props["CoordSystem"] = pccsname
+            Inf_setup_list[0].props["ThetaStart"] = "-30deg"
+            Inf_setup_list[0].props["ThetaStop"] = "30deg"
+            Inf_setup_list[0].props["ThetaStep"] = "0.5deg"
+
         # Now export antenna parameters file wrt rotated CS.
 
         oMod.ExportParametersToFile( \
@@ -616,11 +601,11 @@ class Ui_PhaseCenter(QMainWindow):
             euler_theta = (-theta_at_max_rEcomp)
             euler_psi = (dd)
         else:
-            bb = (phi_at_max_rETotal) * math.pi / 180
-            cc = (theta_at_max_rETotal) * math.pi / 180
-            dd = 0
-            euler_phi = phi_at_max_rETotal
-            euler_theta = theta_at_max_rETotal
+            # bb = (phi_at_max_rETotal) * math.pi / 180
+            # cc = (theta_at_max_rETotal) * math.pi / 180
+            # dd = 0
+            euler_phi = phi_at_max_rEcomp
+            euler_theta = theta_at_max_rEcomp
             euler_psi = 0
 
         cs1 = self.hfss.modeler.create_coordinate_system(name=relative2pccs_auto_name, origin=["0"+unit,"0"+unit,"0"+unit],
@@ -677,7 +662,7 @@ class Ui_PhaseCenter(QMainWindow):
         V1 = np.matmul(r, PhC_wrt_rel)
         r = Rotation.from_euler(euler_mode, ZYZ_pccs, degrees=True).as_matrix()
         V2 = np.matmul(r, V1)
-        initial_guess =  np.array([[float(originX)], [float(originY)], [float(originZ)]])
+        initial_guess = np.array([[float(originX)], [float(originY)], [float(originZ)]])
         PhC_wrt_global = np.add(V2, initial_guess)
         # if PCV = No, then plot 2cuts.
         # insert infinite sphere for plotting in the App. We want to see how phase looks across 0,90 cuts using
@@ -739,12 +724,20 @@ class Ui_PhaseCenter(QMainWindow):
     def createRCS(self):
         Inf_setup_list = [x for x in self.hfss.field_setups if self.Inf_PC in x.name]
         if Inf_setup_list:
-            [x.delete() for x in Inf_setup_list]
-        CS_list = [x for x in self.hfss.modeler.coordinate_systems if self.PC_CS_name in x.name]
-        if CS_list:
-            [x.delete() for x in CS_list]
+            self.reset()
+        #     [x.delete() for x in Inf_setup_list]
+        # CS_list = [x for x in self.hfss.modeler.coordinate_systems if self.PC_CS_name in x.name]
+        # if CS_list:
+        #     [x.delete() for x in CS_list]
+        #
 
         self.hfss.save_project()
+        if self.Inf_global not in [x.name for x in self.hfss.field_setups]:
+            self.hfss.insert_infinite_sphere(definition='Theta-Phi', x_start=-180, x_stop=180, x_step=self.theta_step,
+                                             y_start=0, y_stop=180, y_step=self.phi_step, units='deg',
+                                             custom_radiation_faces=None, custom_coordinate_system=None,
+                                             use_slant_polarization=False, polarization_angle=45,
+                                             name=self.Inf_global)
         #time.sleep(2)
 
         if self.Auto:
@@ -787,7 +780,7 @@ class Ui_PhaseCenter(QMainWindow):
                     c+=1
                     self.lineEdit_Frequency.setText(str(f)+f_unit)
                     aa = self.autoCreateRCS(setup)
-                    answer = "Freq=" + self.lineEdit_Frequency.text() + " | x=" + str(
+                    answer = "Freq= " + self.lineEdit_Frequency.text() + " | x=" + str(
                         "{:.2f}".format(aa[0][0])) + " | y=" + str("{:.2f}".format(aa[1][0])) + " | z=" + str(
                         "{:.2f}".format(aa[2][0]))
                     self.comboBox_PhC.addItem(answer)
@@ -842,6 +835,48 @@ class Ui_PhaseCenter(QMainWindow):
         elif self.comboBox_ViewOrientation.currentText() == "Isometric":
             orientation = "isometric"
 
+        # pick frequency in result combobox. will make 3d polar plot visible for that frequency
+        # pick right context - 3D. make its cs=phc selected
+        # pick reComp to plot
+
+        if self.comboBox_pcv.currentText() == "Yes":
+            sweep_name = self.hfss.setups[0].sweeps[0].name  # debug
+            setup = self.hfss.existing_analysis_setups[0] + ": " + sweep_name
+            freq = self.comboBox_referenceCS1.currentText()[4:]
+        else:
+            setup = self.hfss.existing_analysis_setups[0] + ": LastAdaptive"
+            freq = self.lineEdit_Frequency.text()
+
+        if self.checkBox_ShowPattern.isChecked():
+
+            # let the inf sphere wrt global cs be wrt the phc so we can plot the radiation pattern wrt that
+            Inf_setup_list = [x for x in self.hfss.field_setups if self.Inf_global == x.name]
+            if Inf_setup_list and self.comboBox_referenceCS1.currentText() != "Global":
+                Inf_setup_list[0].props["UseLocalCS"] = True
+                Inf_setup_list[0].props["CoordSystem"] = "PhC_" + freq
+
+            oModule = self.hfss.odesign.GetModule("ReportSetup")
+            # if rEcomp exists, delete it.
+            if "rEcomp" in self.hfss.post.all_report_names:
+                self.hfss.post.delete_report("rEcomp")
+            oModule.CreateReport("rEcomp", "Far Fields", "3D Polar Plot", setup,
+                                 [
+                                     "Context:="	, self.Inf_global
+                                 ],
+                                 [
+                                     "Phi:="			, ["All"],
+                                     "Theta:="		, ["All"],
+                                     "Freq:="		, [freq]
+                                 ],
+                                 [
+                                     "Phi Component:="	, "Phi",
+                                     "Theta Component:="	, "Theta",
+                                     "Mag Component:="	, ["mag(rE"+self.comboBox_Polarization.currentText()+")"]
+                                 ])
+            oModule = self.hfss.odesign.GetModule("FieldsReporter")
+            oModule.ShowRadiatedPlotOverlay("rEcomp", 0.4, 1)
+
+
         hfss.post.export_model_picture(self.hfss.working_directory + "/model_chosenOrientation.jpg", show_grid=False,
                                             show_ruler=False, orientation=orientation)
         self.pixmap = QPixmap(self.hfss.working_directory + "/model_chosenOrientation.jpg")
@@ -867,19 +902,19 @@ class Ui_PhaseCenter(QMainWindow):
         self.label_Modeler2.setScaledContents(True)
         self.label_forModeler2.setText(cs+" - Top View")
 
-        setupName = hfss.existing_analysis_setups[0]
-        setup_sweep_name = setupName + " : LastAdaptive"
+        # setupName = hfss.existing_analysis_setups[0]
+        # setup_sweep_name = setupName + " : LastAdaptive"
         ## show pattern
-        if self.checkBox_ShowPattern.isChecked():
-
-            variations = {}
-            variations["Freq"] = [self.lineEdit_Frequency.text()]
-            variations["Theta"] = ["All"]
-            variations["Phi"] = ["All"]
-
-            ffData = hfss.post.get_solution_data(expressions="GainTotal", setup_sweep_name = setup_sweep_name, report_category="Far Fields",\
-                                                      context=self.Inf_global, variations=variations)
-            hfss.post.create_3d_plot(ffData)
+        # if self.checkBox_ShowPattern.isChecked():
+        #
+        #     variations = {}
+        #     variations["Freq"] = [self.lineEdit_Frequency.text()]
+        #     variations["Theta"] = ["All"]
+        #     variations["Phi"] = ["All"]
+        #
+        #     ffData = hfss.post.get_solution_data(expressions="GainTotal", setup_sweep_name = setup_sweep_name, report_category="Far Fields",\
+        #                                               context=self.Inf_global, variations=variations)
+        #     hfss.post.create_3d_plot(ffData)
 
 
     def calculatePC2(self, k0, ffData1, ffData2):
@@ -986,6 +1021,24 @@ class Ui_PhaseCenter(QMainWindow):
 
         self.hfss.save_project()
         #[x.delete() for x in self.hfss.modeler.coordinate_systems if self.PC_CS_name in x.name]
+        #reset UI
+        # remove all entries from phc result combobox
+        # for some reason it is not removing all items. So I will try clear()
+        if self.comboBox_PhC.count() != 0:
+            #[self.comboBox_PhC.removeItem(i) for i in list(range(self.comboBox_PhC.count()))]
+            self.comboBox_PhC.clear()
+        # remove all entries from visualize/reference cs1 except global
+        if self.comboBox_referenceCS1.currentText() != '':
+            #[self.comboBox_referenceCS1.removeItem(i) for i in list(range(self.comboBox_referenceCS1.count())) if 'Global' != self.comboBox_referenceCS1.itemText(i)]
+            self.comboBox_referenceCS1.clear()
+            self.comboBox_referenceCS1.addItem('Global')
+        # clear the plot
+        for item in self.plotwidget.listDataItems():
+            self.plotwidget.removeItem(item)
+             # clear frequency
+        self.lineEdit_Frequency.setText('')
+        self.numCurves = 0
+        self.hfss.logger.clear_messages()
 
     def exitApp(self):
         self.hfss.save_project()
