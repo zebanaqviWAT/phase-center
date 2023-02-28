@@ -14,6 +14,7 @@ import os
 from scipy.spatial.transform import Rotation
 import sys, time, numpy as np
 from pyaedt import Hfss
+from pyaedt import settings
 from PySide6.QtCore import (Qt, QCoreApplication, QRegularExpression, QMetaObject, QRect)
 from PySide6.QtGui import (QAction, QRegularExpressionValidator, QIcon, QCloseEvent, QPixmap)
 from PySide6.QtWidgets import (QApplication, QMainWindow, QCheckBox, QComboBox, QGroupBox, QLabel, QMenu, QMenuBar, \
@@ -21,6 +22,9 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QCheckBox, QComboBox, 
 from pyqtgraph import PlotWidget
 import pyqtgraph
 
+# if below is set to true - the default, you will have to start AEDT from the console using
+# <path to ansysedt.exe> -grpcsrv 55555
+settings.use_grpc_api = False
 
 class UiPhaseCenter1(QMainWindow):
 
@@ -785,6 +789,9 @@ class UiPhaseCenter1(QMainWindow):
             setup = self.hfss.existing_analysis_setups[0] + " : LastAdaptive"
             freq = self.lineEdit_Frequency.text()
 
+        if "rEcomp" in hfss.post.all_report_names:
+            hfss.post.delete_report("rEcomp")
+
         if self.checkBox_ShowPattern.isChecked():
 
             # let the inf sphere wrt global cs be wrt the phc so we can plot the radiation pattern wrt that
@@ -794,8 +801,8 @@ class UiPhaseCenter1(QMainWindow):
                 Inf_setup_list[0].props["UseLocalCS"] = True
             oModule = hfss.odesign.GetModule('ReportSetup')
             # if rEcomp exists, delete it.
-            if "rEcomp" in hfss.post.all_report_names:
-                hfss.post.delete_report("rEcomp")
+            # if "rEcomp" in hfss.post.all_report_names:
+            #     hfss.post.delete_report("rEcomp")
             oModule.CreateReport("rEcomp", "Far Fields", "3D Polar Plot", setup,
                                  ["Context:=", self.Inf_global],
                                  ["Phi:=", ["All"], "Theta:=", ["All"], "Freq:=", [freq]],
