@@ -1,2 +1,3 @@
 # phase-center
 Calculate phase center automatically and plot phase center variation. Other app automates the optimization setup creation.
+Open a solved project in 23R1. While it is open, run the script. When GUI comes up, provide the polarization, select if you want to plot phase center variation with frequency (available if discrete sweep is solved), provide units in which you want to see the coordinate values for phase center. Click calculate. Once solved, you can visualize the location of the phase center by selecting the corresponding coordinate system from the dropdown menu under visualize box. If you check pattern, you will see the 3D polar plot of rE<polarization> as well.
